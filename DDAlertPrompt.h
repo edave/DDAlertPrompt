@@ -33,11 +33,15 @@
 	UITableView *tableView_;
 	UITextField *plainTextField_;
 	UITextField *secretTextField_;
+	BOOL _includePasswordField;
+	NSDictionary* _userInfo;
 }
 
 @property(nonatomic, retain, readonly) UITextField *plainTextField;
 @property(nonatomic, retain, readonly) UITextField *secretTextField;
+@property(nonatomic, retain) NSDictionary* userInfo;
 
 - (id)initWithTitle:(NSString *)title delegate:(id /*<UIAlertViewDelegate>*/)delegate cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitle:(NSString *)otherButtonTitles;
+- (id)initWithTitle:(NSString *)title delegate:(id)delegate cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitle:(NSString *)otherButtonTitles showPasswordField:(BOOL)includePasswordField;
 
 @end

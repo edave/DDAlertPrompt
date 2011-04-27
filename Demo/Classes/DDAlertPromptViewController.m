@@ -12,7 +12,7 @@
 @implementation DDAlertPromptViewController
 
 - (IBAction)alertAction {
-	DDAlertPrompt *loginPrompt = [[DDAlertPrompt alloc] initWithTitle:@"Sign in to Service" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitle:@"Sign In"];	
+	DDAlertPrompt *loginPrompt = [[DDAlertPrompt alloc] initWithTitle:@"Sign in to Service" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitle:@"Sign In" showPasswordField:NO];	
 	[loginPrompt show];
 	[loginPrompt release];	
 }

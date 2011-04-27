@@ -41,6 +41,7 @@
 @synthesize tableView = tableView_;
 @synthesize plainTextField = plainTextField_;
 @synthesize secretTextField = secretTextField_;
+@synthesize userInfo = _userInfo;
 
 /*
 -(BOOL)_needsKeyboard {
@@ -49,12 +50,11 @@
 }
 */
 
-- (id)initWithTitle:(NSString *)title delegate:(id /*<UIAlertViewDelegate>*/)delegate cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitle:(NSString *)otherButtonTitles {
-
+- (id)initWithTitle:(NSString *)title delegate:(id)delegate cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitle:(NSString *)otherButtonTitles showPasswordField:(BOOL)includePasswordFields{
 	if ((self = [super initWithTitle:title message:@"\n\n\n" delegate:delegate cancelButtonTitle:cancelButtonTitle otherButtonTitles:otherButtonTitles, nil])) {
 		// FIXME: This is a workaround. By uncomment below, UITextFields in tableview will show characters when typing (possible keyboard reponder issue).
 		[self addSubview:self.plainTextField];
-
+		_includePasswordField = includePasswordFields;
 		tableView_ = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
 		tableView_.delegate = self;
 		tableView_.dataSource = self;		
@@ -64,17 +64,22 @@
 		tableView_.editing = YES;
 		tableView_.rowHeight = 28.0f;
 		[self addSubview:tableView_];
-								
+		
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:nil];        
 		[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
 	}
 	return self;
 }
 
+- (id)initWithTitle:(NSString *)title delegate:(id /*<UIAlertViewDelegate>*/)delegate cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitle:(NSString *)otherButtonTitles {
+	[self initWithTitle:title delegate:delegate cancelButtonTitle:cancelButtonTitle otherButtonTitle:otherButtonTitles showPasswordField:YES];
+	return self;
+}
+
 - (void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 	[[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
-	
+	[_userInfo release];
 	[tableView_ setDataSource:nil];
 	[tableView_ setDelegate:nil];
 	[tableView_ release];
@@ -85,13 +90,17 @@
 
 - (void)layoutSubviews {
 	// We assume keyboard is on.
+	float height = 28.0f;
+	if(_includePasswordField){
+		height = 56.0f;
+	}
 	if ([[UIDevice currentDevice] isGeneratingDeviceOrientationNotifications]) {
 		if (UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation])) {
 			self.center = CGPointMake(160.0f, (460.0f - 216.0f)/2 + 12.0f);
-			self.tableView.frame = CGRectMake(12.0f, 51.0f, 260.0f, 56.0f);		
+			self.tableView.frame = CGRectMake(12.0f, 51.0f, 260.0f, height);		
 		} else {
 			self.center = CGPointMake(240.0f, (300.0f - 162.0f)/2 + 12.0f);
-			self.tableView.frame = CGRectMake(12.0f, 35.0f, 260.0f, 56.0f);		
+			self.tableView.frame = CGRectMake(12.0f, 35.0f, 260.0f, height);		
 		}
 	}
 }
@@ -132,7 +141,10 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return 2;
+	if (_includePasswordField) {
+		return 2;
+	}
+	return 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -145,7 +157,7 @@
     }
 	
 	if (![cell.contentView.subviews count]) {
-		if (indexPath.row) {
+		if (indexPath.row && _includePasswordField) {
 			[cell.contentView addSubview:self.secretTextField];			
 		} else {
 			[cell.contentView addSubview:self.plainTextField];
